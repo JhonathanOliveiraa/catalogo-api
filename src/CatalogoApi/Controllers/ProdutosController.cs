@@ -25,7 +25,7 @@ public sealed class ProdutosController(IProdutoService service) : ControllerBase
     [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest, "application/problem+json")]
     public Task<PaginaResponse<ProdutoResponse>> Listar(
         [FromQuery] ListarProdutosQuery query, CancellationToken cancellationToken) =>
-        service.ListarAsync(query, cancellationToken);
+        throw new InvalidOperationException("EXPERIMENTO: defeito injetado na listagem");
 
     [HttpGet("{id:int}")]
     [ProducesResponseType<ProdutoResponse>(StatusCodes.Status200OK, "application/json")]
