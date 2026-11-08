@@ -1,0 +1,19 @@
+# Só Directory.Build.props e src/ entram no contexto de build
+**/bin/
+**/obj/
+**/TestResults/
+**/*.user
+.git/
+.github/
+.vs/
+.vscode/
+.agents/
+.claude/
+_bmad/
+_bmad-output/
+tests/
+scripts/
+*.md
+*.env
+Dockerfile
+.dockerignore
