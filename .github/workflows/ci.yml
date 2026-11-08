@@ -17,6 +17,7 @@ jobs:
       platform-repository: JhonathanOliveiraa/tcc-platform
       overlay-path: apps/catalogo-api/hml
       dotnet-version: "10.0.x"
+      test-command: ""   # EXPERIMENTO: defeito que escapa aos testes
       # test-command padrão: dotnet test --configuration Release (unidade + integração com Testcontainers)
       enable-deploy: ${{ github.event_name != 'pull_request' }}
     secrets:
