@@ -35,6 +35,7 @@ builder.Services.AddPersistencia();
 builder.AddObservabilidade();
 
 var app = builder.Build();
+_ = app.Configuration["Catalogo:Fornecedor"] ?? throw new InvalidOperationException("Configuração obrigatória Catalogo:Fornecedor ausente."); // EXPERIMENTO: defeito injetado
 
 // Configuração obrigatória ausente ou inválida derruba o startup com mensagem clara (AD-8).
 CorsExtensions.LerOrigens(app.Configuration);
