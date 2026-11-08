@@ -7,12 +7,11 @@ namespace CatalogoApi.Controllers;
 /// <summary>Recebe, delega ao Service e devolve; sem regra de negócio nem try/catch (AD-1, AD-3).</summary>
 [ApiController]
 [Route("produtos")]
-[Produces("application/json")]
 public sealed class ProdutosController(IProdutoService service) : ControllerBase
 {
     [HttpPost]
     [Consumes("application/json")]
-    [ProducesResponseType<ProdutoResponse>(StatusCodes.Status201Created)]
+    [ProducesResponseType<ProdutoResponse>(StatusCodes.Status201Created, "application/json")]
     [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest, "application/problem+json")]
     public async Task<ActionResult<ProdutoResponse>> Criar(
         CriarProdutoRequest request, CancellationToken cancellationToken)
@@ -22,21 +21,21 @@ public sealed class ProdutosController(IProdutoService service) : ControllerBase
     }
 
     [HttpGet]
-    [ProducesResponseType<PaginaResponse<ProdutoResponse>>(StatusCodes.Status200OK)]
+    [ProducesResponseType<PaginaResponse<ProdutoResponse>>(StatusCodes.Status200OK, "application/json")]
     [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest, "application/problem+json")]
     public Task<PaginaResponse<ProdutoResponse>> Listar(
         [FromQuery] ListarProdutosQuery query, CancellationToken cancellationToken) =>
         service.ListarAsync(query, cancellationToken);
 
     [HttpGet("{id:int}")]
-    [ProducesResponseType<ProdutoResponse>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProdutoResponse>(StatusCodes.Status200OK, "application/json")]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")]
     public Task<ProdutoResponse> Obter(int id, CancellationToken cancellationToken) =>
         service.ObterAsync(id, cancellationToken);
 
     [HttpPut("{id:int}")]
     [Consumes("application/json")]
-    [ProducesResponseType<ProdutoResponse>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProdutoResponse>(StatusCodes.Status200OK, "application/json")]
     [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest, "application/problem+json")]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")]
     public Task<ProdutoResponse> Atualizar(
@@ -45,7 +44,7 @@ public sealed class ProdutosController(IProdutoService service) : ControllerBase
 
     [HttpPatch("{id:int}/status")]
     [Consumes("application/json")]
-    [ProducesResponseType<ProdutoResponse>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProdutoResponse>(StatusCodes.Status200OK, "application/json")]
     [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest, "application/problem+json")]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")]
     public Task<ProdutoResponse> AlterarStatus(
