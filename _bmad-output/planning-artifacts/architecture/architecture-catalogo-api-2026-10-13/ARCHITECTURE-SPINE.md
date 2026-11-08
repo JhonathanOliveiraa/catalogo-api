@@ -7,7 +7,7 @@ paradigm: 'arquitetura em camadas (Controller → Service → Repository → EF 
 scope: 'catalogo-api inteiro: API REST de Produtos (CAP-1..CAP-7) e seu encaixe no Golden Path do tcc-platform'
 status: final
 created: '2026-10-13'
-updated: '2026-10-13'
+updated: '2026-11-08'
 binds: [CAP-1, CAP-2, CAP-3, CAP-4, CAP-5, CAP-6, CAP-7]
 sources:
   - _bmad-output/specs/spec-catalogo-api/SPEC.md
@@ -150,7 +150,7 @@ flowchart TD
 
 - **Binds:** CAP-7
 - **Prevents:** exporter, endpoint ou nome de serviço fixos no código, ou spans faltando numa camada.
-- **Rule:** Os traces usam o SDK OpenTelemetry .NET com instrumentação de ASP.NET Core, HttpClient e EF Core, exportando por OTLP. Endpoint, protocolo e `service.name` vêm só de `OTEL_*`. Spans manuais são opcionais; nenhum código substitui a auto-instrumentação.
+- **Rule:** Os traces usam o SDK OpenTelemetry .NET com instrumentação de ASP.NET Core, HttpClient e EF Core, exportando por OTLP. Métricas (ASP.NET Core, HttpClient, runtime) e logs (provider OpenTelemetry do `ILogger`) saem pelo mesmo exporter (`UseOtlpExporter()`), e o console continua escrevendo no stdout. Endpoint, protocolo, `service.name` e atributos de recurso vêm só de `OTEL_*`. Spans manuais são opcionais; nenhum código substitui a auto-instrumentação.
 
 ### AD-11 — Contêiner e health check [ADOPTED]
 
@@ -206,18 +206,20 @@ flowchart TD
 | --- | --- |
 | .NET / ASP.NET Core / EF Core | 10.0 (LTS, suporte até 2028-11-14) |
 | Npgsql.EntityFrameworkCore.PostgreSQL | 10.0.3 |
-| OpenTelemetry .NET SDK + instrumentações ASP.NET Core / HttpClient | 1.19 |
-| OpenTelemetry.Instrumentation.EntityFrameworkCore | 1.19.1-beta.1 |
-| Microsoft.AspNetCore.OpenApi | 10.0 |
+| EF Core (Design, dotnet-ef) / Microsoft.AspNetCore.OpenApi / HealthChecks.EntityFrameworkCore | 10.0.14 |
+| OpenTelemetry (Extensions.Hosting, Exporter.OpenTelemetryProtocol) | 1.20.1 |
+| OpenTelemetry.Instrumentation.AspNetCore / Http | 1.20.2 |
+| OpenTelemetry.Instrumentation.Runtime | 1.20.1 |
+| OpenTelemetry.Instrumentation.EntityFrameworkCore | 1.20.2-beta.1 |
 | Testcontainers.PostgreSql | 4.16.0 |
 | Imagem base | `aspnet:10.0-noble-chiseled` (UID 1654, porta 8080) |
-| PostgreSQL (cluster e testes) | 18 (a mais recente; subir junto quando o 19 sair, previsto para 2026-10-29) |
+| PostgreSQL (cluster e testes) | 17 (`postgres:17-alpine`). Desvio de 2026-11-08: o cluster já roda 17 com dados e a migração de major não entra no TCC; os testes acompanham a major do cluster. |
 
 ## Structural Seed
 
 ```text
 catalogo-api/
-  CatalogoApi.sln
+  CatalogoApi.slnx              # formato gerado pelo SDK 10
   Dockerfile                    # multi-stage; SDK em $BUILDPLATFORM; final chiseled arm64
   .github/workflows/ci.yml      # dotnet-version 10.0.x; gatilhos push/PR ligados
   src/CatalogoApi/
@@ -243,7 +245,7 @@ flowchart LR
       KONG[Kong] --> POD[catalogo-api :8080]
       POD -->|OTLP| ALLOY[Grafana Alloy]
       ES[ExternalSecret] -.ConnectionStrings__Catalogo.-> POD
-      POD --> PG[(PostgreSQL 18<br/>ApplicationSet Argo CD)]
+      POD --> PG[(PostgreSQL 17<br/>ApplicationSet Argo CD)]
     end
     FRONT[catalogo-front<br/>navegador] -->|CORS| KONG
     ALLOY --> GC[Grafana Cloud]
@@ -276,7 +278,6 @@ Os ambientes hml e prod são overlays/hosts distintos no `tcc-platform`. A mesma
 | Item | Por que pode esperar |
 | --- | --- |
 | Concorrência otimista no `PUT` (ETag/`xmin`) | Última escrita vence; com um único consumidor, nenhuma unidade diverge por isso. Revisitar se surgir edição concorrente real. |
-| Logs e métricas via OTLP | O contrato exige só traces (CAP-7). Ligar depois não muda nenhuma fronteira. |
 | Probes, resources, réplicas, rota Kong | Definidos em `golden-path/base` e no overlay, fora deste repo. |
 | Quais `OTEL_*` a plataforma injeta | A app só usa as variáveis padrão do SDK (AD-10); qualquer subconjunto injetado funciona sem mudar código. |
 | Provisionamento do PostgreSQL | ApplicationSet do Argo CD no `tcc-platform`; a app só recebe a connection string. |

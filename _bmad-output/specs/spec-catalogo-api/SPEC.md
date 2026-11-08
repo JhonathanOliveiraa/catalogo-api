@@ -37,11 +37,11 @@ sources: []
   - **success:** O endpoint de readiness retorna 200 com o serviço saudável e não-200 com o banco indisponível. O endpoint de liveness retorna 200 enquanto o processo atende, independente do banco.
 - **CAP-7**
   - **intent:** O operador observa o serviço no Grafana Cloud.
-  - **success:** Uma requisição HTTP gera um trace OTLP com spans de ASP.NET Core e EF Core.
+  - **success:** Uma requisição HTTP gera um trace OTLP com spans de ASP.NET Core e EF Core. O serviço também exporta métricas (ASP.NET Core, HttpClient, runtime) e logs por OTLP, sem deixar de escrever os logs no stdout.
 
 ## Constraints
 
-- A stack é .NET 10 LTS (ASP.NET Core) com EF Core sobre PostgreSQL 18. O banco roda no cluster, provisionado por ApplicationSet do Argo CD no `tcc-platform`.
+- A stack é .NET 10 LTS (ASP.NET Core) com EF Core sobre PostgreSQL 17. O banco roda no cluster, provisionado por ApplicationSet do Argo CD no `tcc-platform`. (Era 18 no planejamento; ficou 17 porque o cluster já roda `postgres:17-alpine` com dados e a migração de major não faz parte do escopo do TCC.)
 - Todo o contrato do Golden Path em `golden-path.md` é obrigatório: imagem `linux/arm64` não-root, OTel/OTLP, CI compartilhada, manifestos e segredos fora do repo.
 - A configuração vem só do ambiente: connection string via ExternalSecret e telemetria pelas variáveis `OTEL_*` padrão. Nenhum endpoint fica fixo no código e nenhum segredo fica no repositório.
 - As migrations do EF Core são aplicadas no startup. A aplicação precisa de permissão DDL e o startup precisa tolerar réplicas concorrentes.

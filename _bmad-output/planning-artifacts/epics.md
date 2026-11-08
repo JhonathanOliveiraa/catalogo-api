@@ -46,7 +46,7 @@ Os requisitos funcionais usam os IDs `CAP-N` do spec.
 - Exceções de domínio traduzidas por um único `IExceptionHandler`; rotas `{id:int}` (AD-3).
 - Validação em dois níveis, com limites espelhados entre DTO e EF (AD-4).
 - Ciclo de vida por `Status`, sem `DELETE` (AD-5); datas pelo Service via `TimeProvider`, truncadas a microssegundos (AD-6).
-- Testes de integração com `WebApplicationFactory` + Testcontainers `postgres:18`; casos obrigatórios `?status=1` → 400 e OpenAPI com enums como string (AD-12).
+- Testes de integração com `WebApplicationFactory` + Testcontainers `postgres:17-alpine`; casos obrigatórios `?status=1` → 400 e OpenAPI com enums como string (AD-12).
 - Dockerfile multi-stage, com o estágio SDK em `$BUILDPLATFORM` publicando com `-a $TARGETARCH` (AD-11).
 - Dependências externas (fora deste repositório): overlay `tcc-platform/apps/catalogo-api` com ExternalSecret e `Cors__OrigensPermitidas`; probes do `golden-path/base` em `/health/live` (liveness) e `/health` (readiness); merge de `fix/trivy-action-sha` no `tcc-pipeline-templates`.
 
@@ -139,7 +139,7 @@ So that ele só receba tráfego quando estiver pronto (CAP-6; AD-8, AD-9, AD-12;
 
 **Given** a suíte de testes
 **When** os testes de integração rodam
-**Then** usam uma fixture Testcontainers `postgres:18`, compartilhada pelas histórias seguintes
+**Then** usam uma fixture Testcontainers `postgres:17-alpine`, compartilhada pelas histórias seguintes
 **And** não existe connection string no repositório; o `appsettings.json` só tem padrões não sensíveis
 
 ### Story 1.3: Traces OpenTelemetry
