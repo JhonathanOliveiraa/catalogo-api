@@ -15,7 +15,17 @@ builder.Services.ConfigureHttpJsonOptions(options => ConfiguracaoJson.Aplicar(op
 
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<TratadorExcecoes>();
-builder.Services.AddOpenApi();
+builder.Services.AddOpenApi(options => options.AddSchemaTransformer((schema, context, _) =>
+{
+    // O .NET 10 descreve enums só com "enum": [...]. O contrato (AD-7) e o gerador do cliente do
+    // front exigem enum de strings explícito.
+    if (context.JsonTypeInfo.Type.IsEnum)
+    {
+        schema.Type = Microsoft.OpenApi.JsonSchemaType.String;
+    }
+
+    return Task.CompletedTask;
+}));
 builder.Services.AddCorsCatalogo();
 
 builder.Services.AddSingleton(TimeProvider.System);

@@ -154,6 +154,12 @@ public sealed class ListagemTests(PostgresFixture fx)
         var enums = new List<JsonElement>();
         ColetarEnums(doc.RootElement, enums);
 
+        var schemas = doc.RootElement.GetProperty("components").GetProperty("schemas");
+        foreach (var nome in new[] { nameof(CampoOrdenacao), nameof(DirecaoOrdenacao), nameof(StatusProduto) })
+        {
+            Assert.Equal("string", schemas.GetProperty(nome).GetProperty("type").GetString());
+        }
+
         foreach (var esperado in new[]
                  {
                      Enum.GetNames<CampoOrdenacao>(),
